@@ -18,15 +18,7 @@
 /*
  * SENDING, RECEIVING SMS PROTOCOL  => THIS MUST ALSO BE DOCUMENTED IN THE SERVER
  * 
- * MESSAGE FORMAT IN SENDING SMS (from python to arduino)
- * RECEIVER&CMD&SIM_NUMBER&MESSAGE&DATETIME
- * 
- * Ex. RECEIVER&SEND&+6309506305568&Good day!&12/12/2021,15:23
- * 
- * MESSAGE FORMAT IN RECEIVING SMS  (from arduino to python)
- * TRANSMITTER:CMD:SIM_NUMBER:MESSAGE:DATETIME
- * 
- * Ex. TRANSMITTER&SAVE&+6309506305568&Good day!&12/12/2021,15:23
+ * TRANSMITTER&SAVE&DISTANCE&ALERT_TYPE
  */
 
 #include "GPRS_Shield_Arduino.h"
@@ -56,15 +48,18 @@ char datetime[24];
 
 #define SOURCE_INDEX 0
 #define CMD_INDEX 1
-#define SIMNUMBER_INDEX 2
-#define MSG_INDEX 3
-#define DATETIME_INDEX 4
+#define DISTANCE_INDEX 2
+#define ALERT_TYPE_INDEX 3
+#define SIMNUMBER_INDEX 4
+#define DATETIME_INDEX 5
+
+#define MSG_INDEX 2
 
 GPRS gprs(PIN_TX, PIN_RX, BAUDRATE); //RX,TX,PWR,BaudRate
 
 void setup() {
     gprs.checkPowerUp();
-    Serial.begin(9600);
+    Serial.begin(BAUDRATE);
     while (!gprs.init()) {
 //        Serial.print("init error\r\n");
         delay(1000);
@@ -111,17 +106,17 @@ void loop() {
 
         String str = String(message);
 
-        int i = str.indexOf(TRANSMITTER);
+//        int i = str.indexOf(TRANSMITTER);
 
         if (str.indexOf(TRANSMITTER) != -1)
         {
-          String data = TRANSMITTER;
-          data.concat(SEPARATOR);
-          data.concat(SAVE);
+
+//          Your transmitter SHOULD have this format of message
+//          TRANSMITTER&SAVE&DISTANCE&ALERT_TYPE
+          
+          String data = message;
           data.concat(SEPARATOR);
           data.concat(phone);
-          data.concat(SEPARATOR);
-          data.concat(message);
           data.concat(SEPARATOR);
           data.concat(datetime);
           delay(50);
@@ -133,9 +128,11 @@ void loop() {
           data.concat(SEPARATOR);
           data.concat(SAVE);
           data.concat(SEPARATOR);
-          data.concat(phone);
-          data.concat(SEPARATOR);
           data.concat(message);
+          data.concat(SEPARATOR);
+          data.concat("");
+          data.concat(SEPARATOR);
+          data.concat(phone);
           data.concat(SEPARATOR);
           data.concat(datetime);
           delay(50);
